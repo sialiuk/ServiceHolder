@@ -23,8 +23,7 @@ namespace sch
 
 	public:
 		explicit Service(LPWSTR serviceName, LPWSTR machineName = NULL);
-		void Install(DWORD startType, DWORD serviceType = SERVICE_WIN32_OWN_PROCESS,
-					 DWORD errorCtrl = SERVICE_ERROR_NORMAL);
+		void Install(DWORD startType, DWORD errorCtrl = SERVICE_ERROR_NORMAL);
 		void StartServiceProcess(ServiceFunction serviceMain);
 		void Remove();
 	private:

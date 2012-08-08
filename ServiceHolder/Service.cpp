@@ -11,7 +11,7 @@ namespace sch
 
 	Service::Handle::~Handle()
 	{
-		BOOL f = CloseServiceHandle(m_handle);
+		CloseServiceHandle(m_handle);
 	}
 
 	Service::Handle::operator SC_HANDLE() const
@@ -25,14 +25,14 @@ namespace sch
 	{
 	}
 
-	void Service::Install(DWORD startType, DWORD serviceType, DWORD errorCtrl)
+	void Service::Install(DWORD startType, DWORD errorCtrl)
 	{
 		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
 
 		wchar_t modulePatchName[MAX_PATH];
 		GetModuleFileName(NULL, modulePatchName, sizeof(modulePatchName)); 
 
-		Handle hService = CreateService(scManager, m_serviceName, m_serviceName, 0, serviceType,
+		Handle hService = CreateService(scManager, m_serviceName, m_serviceName, 0, SERVICE_WIN32_OWN_PROCESS,
 													startType, errorCtrl, modulePatchName, NULL, NULL, NULL, NULL, NULL);
 	}
 
