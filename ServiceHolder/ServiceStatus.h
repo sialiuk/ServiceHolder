@@ -13,6 +13,7 @@ namespace sch
 		bool SetUltimateStatus(DWORD dwUltimateState, DWORD dwWaitHint = 0);
 		bool ReportUltimateStatus();
 		bool ReportStatus();
+		DWORD CurrentState()const;
 	private:
 		SERVICE_STATUS_HANDLE m_ssh;
 	};

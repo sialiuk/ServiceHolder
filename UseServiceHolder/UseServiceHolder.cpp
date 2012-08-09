@@ -2,104 +2,77 @@
 //
 
 #include "stdafx.h"
-#include "IOCP.h"
-#include "..\ServiceHolder\Service.h"
-#include "..\ServiceHolder\ServiceStatus.h"
+#include "..\ServiceHolder\ServiceBase.h"
+#include "..\ServiceHolder\ServiceManager.h"
 
-wchar_t serviceName[] = L"UseServiceHolder";
-sch::ServiceStatus serviceSt;
+TCHAR serviceName[] = L"UseServiceHolder";
 
-DWORD WINAPI HandlerEx(DWORD control, DWORD eventType, PVOID eventDate, PVOID context)
+class Myservice
+	: public sch::ServiceBase
 {
-	DWORD dwReturn = ERROR_CALL_NOT_IMPLEMENTED;
-	BOOL fPostControlToServiceThread = FALSE;
-
-	switch (control) 
+public:
+	Myservice()
+		: sch::ServiceBase(serviceName)
+		, m_event(NULL)
 	{
-	case SERVICE_CONTROL_STOP:
-	case SERVICE_CONTROL_SHUTDOWN:
-		serviceSt.SetUltimateStatus(SERVICE_STOPPED, 2000);
-		fPostControlToServiceThread = TRUE;
-		break;
-
-	case SERVICE_CONTROL_PAUSE:
-		serviceSt.SetUltimateStatus(SERVICE_PAUSED, 2000);
-		fPostControlToServiceThread = TRUE;
-		break;
-
-	case SERVICE_CONTROL_CONTINUE:
-		serviceSt.SetUltimateStatus(SERVICE_RUNNING, 2000);
-		fPostControlToServiceThread = TRUE;
-		break;
-
-	case SERVICE_CONTROL_INTERROGATE:
-		serviceSt.ReportStatus();
-		break;
-
-	case SERVICE_CONTROL_PARAMCHANGE:
-		break;
-
-	case SERVICE_CONTROL_DEVICEEVENT:
-	case SERVICE_CONTROL_HARDWAREPROFILECHANGE:
-	case SERVICE_CONTROL_POWEREVENT:
-		break;
-   }
-
-	if (fPostControlToServiceThread) 
-	{
-		CIOCP* piocp = (CIOCP*) context;
-		piocp->PostStatus(0, control);
-		dwReturn = NO_ERROR;
+		m_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	}
 
-   return(dwReturn);
-}
-
-void WINAPI ServiceMain(DWORD dwArgc, PTSTR* pszArgv)
-{
-	ULONG_PTR CompKey;
-	DWORD dwControl = SERVICE_CONTROL_CONTINUE;
-	HANDLE hFile;
-	OVERLAPPED o; 
-	OVERLAPPED* po  = NULL;
-	DWORD dwNumBytes;
-
-	CIOCP iocp(0);
-	//serviceSt.Initialize(serviceName, HandlerEx, (PVOID) &iocp);
-	serviceSt.AcceptControls(SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE);
-
-	do
+	virtual void Run()
 	{
-		switch(dwControl)
+		char DataBuffer[] = "This is some test data to write to the file.";
+		DWORD numBytes = 0;
+		HANDLE hFile = CreateFile(L"D:\\Test.txt",
+									GENERIC_WRITE,
+									FILE_SHARE_WRITE,
+									NULL,
+									OPEN_ALWAYS,
+									FILE_ATTRIBUTE_NORMAL,
+									NULL);
+		ReportStatus(SERVICE_RUNNING);
+		DWORD result;
+		while((result = WaitForSingleObject(m_event, 3000)) == WAIT_TIMEOUT)
 		{
-		case SERVICE_CONTROL_CONTINUE:
-			hFile = CreateFile(L"D:\\test.txt", GENERIC_WRITE, FILE_SHARE_WRITE, NULL
-								, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			WriteFile(hFile,"Service works\n", 14, &dwNumBytes, NULL);
-			break;
-
-		case SERVICE_CONTROL_PAUSE:
-			iocp.GetStatus(&CompKey, &dwControl, &po);
-			serviceSt.ReportUltimateStatus();
-			break;
-
-		case SERVICE_CONTROL_STOP:
+			WriteFile(hFile,
+						DataBuffer,
+						sizeof(DataBuffer),
+						&numBytes,
+						NULL);
+			//FlushFileBuffers(hFile);
+		}
+		if(result == WAIT_OBJECT_0)
+		{
 			CloseHandle(hFile);
-			serviceSt.ReportUltimateStatus();
-			break;
+			ReportStatus(SERVICE_STOPPED);
 		}
+	}
 
-		if(serviceSt.dwCurrentState != SERVICE_STOPPED)
-		{
-			iocp.GetStatus(&CompKey, &dwControl, &po, 10000);
-		}
+	virtual void OnStop()
+	{
+		SetEvent(m_event);
+	}
 
-	} while(serviceSt.dwCurrentState != SERVICE_STOPPED);
-}
+private:
+	HANDLE m_event;
+};
 
+sch::ServiceManager servMan(serviceName);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	if( lstrcmpi( argv[1], TEXT("install")) == 0 )
+    {
+        servMan.Install(SERVICE_DEMAND_START);
+        return 0;
+    }
+	
+	if( lstrcmpi( argv[1], TEXT("remove")) == 0 )
+    {
+		servMan.Remove();
+        return 0;
+    }
+
+	servMan.StartServiceProcess(sch::ServiceBase::ServiceFunction<Myservice>);
 
 	return 0;
 }

@@ -1,31 +1,31 @@
 #include "stdafx.h"
 #include <cassert>
-#include "Service.h"
+#include "ServiceManager.h"
 
 namespace sch
 {
-	Service::Handle::Handle(SC_HANDLE handle)
+	ServiceManager::Handle::Handle(SC_HANDLE handle)
 		: m_handle(handle)
 	{
 	}
 
-	Service::Handle::~Handle()
+	ServiceManager::Handle::~Handle()
 	{
 		CloseServiceHandle(m_handle);
 	}
 
-	Service::Handle::operator SC_HANDLE() const
+	ServiceManager::Handle::operator SC_HANDLE() const
 	{
 		return m_handle;
 	}
 
-	Service::Service(LPWSTR serviceName, LPWSTR machineName)
+	ServiceManager::ServiceManager(LPWSTR serviceName, LPWSTR machineName)
 		: m_serviceName(serviceName)
 		, m_machineName(machineName)
 	{
 	}
 
-	void Service::Install(DWORD startType, DWORD errorCtrl)
+	void ServiceManager::Install(DWORD startType, DWORD errorCtrl)
 	{
 		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
 
@@ -36,19 +36,20 @@ namespace sch
 													startType, errorCtrl, modulePatchName, NULL, NULL, NULL, NULL, NULL);
 	}
 
-	void Service::StartServiceProcess(ServiceFunction serviceMain)
+	void ServiceManager::StartServiceProcess(ServiceFunction serviceMain)
 	{
 		SERVICE_TABLE_ENTRY serviceTable[] = 
 		{
 			{m_serviceName, serviceMain},
 			{NULL, NULL}
 		};
-		assert(StartServiceCtrlDispatcher(serviceTable));
+		BOOL b = StartServiceCtrlDispatcher(serviceTable);
+		DWORD error = GetLastError();
 	}
 
-	void Service::Remove()
+	void ServiceManager::Remove()
 	{
-		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
+		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CONNECT);
 		Handle hService = OpenService(scManager, m_serviceName, DELETE);
 		DeleteService(hService);
 	}

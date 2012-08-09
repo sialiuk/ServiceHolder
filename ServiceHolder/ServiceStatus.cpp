@@ -89,4 +89,9 @@ namespace sch
 		}
 		return false;
 	}
+
+	DWORD ServiceStatus::CurrentState()const
+	{
+		return dwCurrentState;
+	}
 }

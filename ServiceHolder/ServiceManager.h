@@ -4,7 +4,7 @@
 
 namespace sch
 {
-	class Service
+	class ServiceManager
 	{
 		class Handle
 		{
@@ -22,13 +22,13 @@ namespace sch
 		typedef VOID (WINAPI *ServiceFunction)(DWORD, PTSTR*);
 
 	public:
-		explicit Service(LPWSTR serviceName, LPWSTR machineName = NULL);
+		explicit ServiceManager(LPWSTR serviceName, LPWSTR machineName = NULL);
 		void Install(DWORD startType, DWORD errorCtrl = SERVICE_ERROR_NORMAL);
 		void StartServiceProcess(ServiceFunction serviceMain);
 		void Remove();
 	private:
-		Service(const Service&);
-		Service& operator=(const Service&);
+		ServiceManager(const ServiceManager&);
+		ServiceManager& operator=(const ServiceManager&);
 	private:
 		LPWSTR m_serviceName;
 		LPWSTR m_machineName;
