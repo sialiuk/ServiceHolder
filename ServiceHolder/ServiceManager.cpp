@@ -1,28 +1,14 @@
 #include "stdafx.h"
 #include <stdexcept>
 #include <boost\format.hpp>
+#include "HandleService.h"
 #include "ServiceManager.h"
 
 namespace sch
 {
-	ServiceManager::Handle::Handle(SC_HANDLE handle)
-		: m_handle(handle)
-	{
-	}
-
-	ServiceManager::Handle::~Handle()
-	{
-		CloseServiceHandle(m_handle);
-	}
-
-	ServiceManager::Handle::operator SC_HANDLE() const
-	{
-		return m_handle;
-	}
-	
-	ServiceManager::ServiceManager(wchar_t* serviceName, wchar_t* machineName)
+	ServiceManager::ServiceManager(wchar_t* serviceName, ServiceFunction serviceMain)
 		: m_serviceName(serviceName)
-		, m_machineName(machineName)
+		, m_serviceMain(serviceMain)
 	{
 	}
 
@@ -36,7 +22,7 @@ namespace sch
 													% GetLastError()).str());
 		}
 
-		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
+		Handle scManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 		Handle hService = CreateService(scManager, m_serviceName, m_serviceName, 0, SERVICE_WIN32_OWN_PROCESS,
 													startType, errorCtrl, modulePatchName, NULL, NULL, NULL, NULL, NULL);
 		if(scManager == NULL || hService == NULL)
@@ -46,11 +32,11 @@ namespace sch
 		}
 	}
 
-	void ServiceManager::StartServiceProcess(ServiceFunction serviceMain)
+	void ServiceManager::StartServiceProcess()
 	{
 		SERVICE_TABLE_ENTRY serviceTable[] = 
 		{
-			{m_serviceName, serviceMain},
+			{m_serviceName, m_serviceMain},
 			{NULL, NULL}
 		};
 
@@ -63,7 +49,7 @@ namespace sch
 
 	void ServiceManager::Remove()
 	{
-		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CONNECT);
+		Handle scManager = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
 		Handle hService = OpenService(scManager, m_serviceName, DELETE);
 
 		if(scManager == NULL || hService == NULL)

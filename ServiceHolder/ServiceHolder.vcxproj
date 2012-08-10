@@ -81,7 +81,9 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HandleService.h" />
     <ClInclude Include="ServiceBase.h" />
+    <ClInclude Include="ServiceGroupManager.h" />
     <ClInclude Include="ServiceManager.h" />
     <ClInclude Include="ServiceState.h" />
     <ClInclude Include="ServiceStatus.h" />
@@ -89,7 +91,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HandleService.cpp" />
     <ClCompile Include="ServiceBase.cpp" />
+    <ClCompile Include="ServiceGroupManager.cpp" />
     <ClCompile Include="ServiceManager.cpp" />
     <ClCompile Include="ServiceState.cpp" />
     <ClCompile Include="ServiceStatus.cpp" />

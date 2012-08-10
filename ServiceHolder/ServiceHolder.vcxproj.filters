@@ -36,6 +36,12 @@
     <ClInclude Include="ServiceState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ServiceGroupManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +57,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ServiceState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceGroupManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HandleService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
