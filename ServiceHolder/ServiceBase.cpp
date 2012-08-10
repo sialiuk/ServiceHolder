@@ -3,9 +3,9 @@
 
 namespace sch
 {
-	ServiceBase::ServiceBase(const TCHAR* srviceName)
+	ServiceBase::ServiceBase(const TCHAR* serviceName)
 	{
-		SERVICE_STATUS_HANDLE service = RegisterServiceCtrlHandlerEx(srviceName, HandlerCallback, this);
+		SERVICE_STATUS_HANDLE service = RegisterServiceCtrlHandlerEx(serviceName, HandlerCallback, this);
 		m_stateService.Initialize(service);
 	}
 
@@ -30,38 +30,42 @@ namespace sch
 		m_stateService.ReportStatus(stateUltimate, waitHint);
 	}
 
+	DWORD ServiceBase::GetCurrentState() const
+	{
+		return m_stateService.GetCurrentState();
+	}
+
 	DWORD WINAPI ServiceBase::HandlerCallback(DWORD control, DWORD eventType, PVOID eventDate, PVOID context)
 	{
-
 		ServiceBase* service = static_cast<ServiceBase*>(context);
-		DWORD state = 0;
 		switch(control)
 		{
 		case SERVICE_CONTROL_SHUTDOWN:
 		case SERVICE_CONTROL_STOP:
+			service->ReportStatus(SERVICE_STOP_PENDING, 2000);
 			service->OnStop();
-			state = SERVICE_STOP_PENDING;
 			break;
 
 		case SERVICE_CONTROL_PAUSE:
+			service->ReportStatus(SERVICE_PAUSE_PENDING, 2000);
 			service->OnPause();
-			state = SERVICE_PAUSE_PENDING;
 			break;
 
 		case SERVICE_CONTROL_CONTINUE:
+			service->ReportStatus(SERVICE_CONTINUE_PENDING, 2000);
 			service->OnStart();
-			state = SERVICE_CONTINUE_PENDING;
 			break;
 
 		case SERVICE_CONTROL_INTERROGATE:
+			service->ReportStatus(service->GetCurrentState());
 			break;
 		
 		case SERVICE_CONTROL_PARAMCHANGE:
-		
+			return ERROR_CALL_NOT_IMPLEMENTED;
+
 		default:
 			return ERROR_CALL_NOT_IMPLEMENTED;
 		}
-		service->ReportStatus(state);
 		return NO_ERROR;
 	}
 }

@@ -2,6 +2,8 @@
 //
 
 #include "stdafx.h"
+#include <boost\thread\mutex.hpp>
+#include <boost\thread\condition_variable.hpp>
 #include "..\ServiceHolder\ServiceBase.h"
 #include "..\ServiceHolder\ServiceManager.h"
 
@@ -10,16 +12,24 @@ TCHAR serviceName[] = L"UseServiceHolder";
 class Myservice
 	: public sch::ServiceBase
 {
+	enum
+	{
+		START,
+		STOP,
+		PAUSE
+	};
+	typedef boost::unique_lock<boost::mutex> Lock;
 public:
 	Myservice()
 		: sch::ServiceBase(serviceName)
-		, m_event(NULL)
+		, m_flag(0)
 	{
 		m_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	}
 
 	virtual void Run()
 	{
+		ReportStatus(SERVICE_START_PENDING, 2000);
 		char DataBuffer[] = "This is some test data to write to the file.";
 		DWORD numBytes = 0;
 		HANDLE hFile = CreateFile(L"D:\\Test.txt",
@@ -30,30 +40,74 @@ public:
 									FILE_ATTRIBUTE_NORMAL,
 									NULL);
 		ReportStatus(SERVICE_RUNNING);
-		DWORD result;
-		while((result = WaitForSingleObject(m_event, 3000)) == WAIT_TIMEOUT)
+		while(GetFlag() != STOP)
 		{
-			WriteFile(hFile,
+			if(GetFlag() != PAUSE)
+			{
+				WriteFile(hFile,
 						DataBuffer,
 						sizeof(DataBuffer),
 						&numBytes,
 						NULL);
-			//FlushFileBuffers(hFile);
+				FlushFileBuffers(hFile);
+				::Sleep(2000);
+			}
+			else
+			{
+				ReportStatus(SERVICE_PAUSED);
+				Lock lock(m_mutexNotify);
+				m_cond.wait(lock);
+
+				if(GetFlag() != STOP)
+				{
+					ReportStatus(SERVICE_RUNNING);
+				}
+			}
 		}
-		if(result == WAIT_OBJECT_0)
-		{
-			CloseHandle(hFile);
-			ReportStatus(SERVICE_STOPPED);
-		}
+		CloseHandle(hFile);
+		ReportStatus(SERVICE_STOPPED);
 	}
 
 	virtual void OnStop()
 	{
-		SetEvent(m_event);
+		if(GetFlag() == PAUSE)
+		{
+			SetFlag(STOP);
+			Lock lock(m_mutexNotify);
+			m_cond.notify_one();
+		}
+		SetFlag(STOP);
 	}
 
+	virtual void OnPause()
+	{
+		SetFlag(PAUSE);
+	}
+
+	virtual void OnStart()
+	{
+		SetFlag(START);
+		Lock lock(m_mutexNotify);
+		m_cond.notify_one();
+	}
+
+	void SetFlag(unsigned value)
+	{
+		Lock lock(m_mutex);
+		m_flag = value;
+	}
+
+	unsigned GetFlag() const
+	{
+		Lock lock(m_mutex);
+		return m_flag;
+	}
 private:
 	HANDLE m_event;
+	unsigned m_flag;
+	mutable boost::mutex m_mutex;
+	mutable boost::mutex m_mutexNotify;
+	boost::condition_variable m_cond;
 };
 
 sch::ServiceManager servMan(serviceName);

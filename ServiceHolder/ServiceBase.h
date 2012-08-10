@@ -13,15 +13,15 @@ namespace sch
 		virtual void OnPause();
 		virtual void Run() = 0;
 		void ReportStatus(DWORD stateUltimate, DWORD waitHint = 0);
-	private:
-		static DWORD WINAPI HandlerCallback(DWORD control, DWORD eventType, PVOID eventDate, PVOID context);
-	public:
+		DWORD GetCurrentState() const;
 		template<class T>
 			static VOID WINAPI ServiceFunction(DWORD, PTSTR*)
 			{
 				T service;
 				service.Run();
 			}
+	private:
+		static DWORD WINAPI HandlerCallback(DWORD control, DWORD eventType, PVOID eventDate, PVOID context);
 	private:
 		ServiceState m_stateService;
 	};

@@ -29,15 +29,27 @@ namespace sch
 		{
 		case SERVICE_START_PENDING:
 		case SERVICE_PAUSE_PENDING:
+		case SERVICE_CONTINUE_PENDING:
+		case SERVICE_STOP_PENDING:
 			dwControlsAccepted = 0;
 			++dwCheckPoint;
 			break;
+
 		case SERVICE_RUNNING:
 		case SERVICE_PAUSED:
 			dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
 			dwCheckPoint = 0;
 			break;
+
+		case SERVICE_STOPPED:
+			dwCheckPoint = 0;
+			break;
 		}
 		::SetServiceStatus(m_service, this);
+	}
+
+	DWORD ServiceState::GetCurrentState() const
+	{
+		return dwCurrentState;
 	}
 }
