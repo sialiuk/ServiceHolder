@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include <cassert>
+#include <stdexcept>
+#include <boost\format.hpp>
 #include "ServiceManager.h"
 
 namespace sch
@@ -18,8 +19,8 @@ namespace sch
 	{
 		return m_handle;
 	}
-
-	ServiceManager::ServiceManager(LPWSTR serviceName, LPWSTR machineName)
+	
+	ServiceManager::ServiceManager(wchar_t* serviceName, wchar_t* machineName)
 		: m_serviceName(serviceName)
 		, m_machineName(machineName)
 	{
@@ -27,13 +28,22 @@ namespace sch
 
 	void ServiceManager::Install(DWORD startType, DWORD errorCtrl)
 	{
-		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
-
 		wchar_t modulePatchName[MAX_PATH];
-		GetModuleFileName(NULL, modulePatchName, sizeof(modulePatchName)); 
+		DWORD result = GetModuleFileName(NULL, modulePatchName, sizeof(modulePatchName));
+		if(result == 0)
+		{
+			throw std::runtime_error((boost::format("Get module file name is failed, error: %1%") 
+													% GetLastError()).str());
+		}
 
+		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CREATE_SERVICE);
 		Handle hService = CreateService(scManager, m_serviceName, m_serviceName, 0, SERVICE_WIN32_OWN_PROCESS,
 													startType, errorCtrl, modulePatchName, NULL, NULL, NULL, NULL, NULL);
+		if(scManager == NULL || hService == NULL)
+		{
+			throw std::runtime_error((boost::format("Install service is failed, error: %1%") 
+													% GetLastError()).str());
+		}
 	}
 
 	void ServiceManager::StartServiceProcess(ServiceFunction serviceMain)
@@ -43,14 +53,29 @@ namespace sch
 			{m_serviceName, serviceMain},
 			{NULL, NULL}
 		};
-		BOOL b = StartServiceCtrlDispatcher(serviceTable);
-		DWORD error = GetLastError();
+
+		if(!StartServiceCtrlDispatcher(serviceTable))
+		{
+			throw std::runtime_error((boost::format("Start service is failed, error: %1%") 
+													% GetLastError()).str());
+		}
 	}
 
 	void ServiceManager::Remove()
 	{
 		Handle scManager = OpenSCManager(m_machineName, NULL, SC_MANAGER_CONNECT);
 		Handle hService = OpenService(scManager, m_serviceName, DELETE);
-		DeleteService(hService);
+
+		if(scManager == NULL || hService == NULL)
+		{
+			throw std::runtime_error((boost::format("Open service is failed, error: %1%") 
+													% GetLastError()).str());
+		}
+
+		if(!DeleteService(hService))
+		{
+			throw std::runtime_error((boost::format("Remove service is failed, error: %1%") 
+													% GetLastError()).str());
+		}
 	}
 }

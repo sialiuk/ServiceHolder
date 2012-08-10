@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <cassert>
 #include "ServiceState.h"
 
 namespace sch
@@ -23,6 +24,7 @@ namespace sch
 
 	void ServiceState::ReportStatus(DWORD stateUltimate, DWORD waitHint)
 	{
+		boost::unique_lock<boost::mutex> lock(m_mutex);
 		dwCurrentState = stateUltimate;
 		dwWaitHint = waitHint;
 		switch(dwCurrentState)
@@ -50,6 +52,7 @@ namespace sch
 
 	DWORD ServiceState::GetCurrentState() const
 	{
+		boost::unique_lock<boost::mutex> lock(m_mutex);
 		return dwCurrentState;
 	}
 }

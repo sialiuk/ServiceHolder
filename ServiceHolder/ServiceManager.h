@@ -22,7 +22,7 @@ namespace sch
 		typedef VOID (WINAPI *ServiceFunction)(DWORD, PTSTR*);
 
 	public:
-		explicit ServiceManager(LPWSTR serviceName, LPWSTR machineName = NULL);
+		explicit ServiceManager(wchar_t* serviceName, wchar_t* machineName = NULL);
 		void Install(DWORD startType, DWORD errorCtrl = SERVICE_ERROR_NORMAL);
 		void StartServiceProcess(ServiceFunction serviceMain);
 		void Remove();
@@ -30,7 +30,7 @@ namespace sch
 		ServiceManager(const ServiceManager&);
 		ServiceManager& operator=(const ServiceManager&);
 	private:
-		LPWSTR m_serviceName;
-		LPWSTR m_machineName;
+		wchar_t* m_serviceName;
+		wchar_t* m_machineName;
 	};
 }

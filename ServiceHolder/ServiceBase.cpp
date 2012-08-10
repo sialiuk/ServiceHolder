@@ -1,11 +1,17 @@
 #include "stdafx.h"
+#include <boost\format.hpp>
 #include "ServiceBase.h"
 
 namespace sch
 {
-	ServiceBase::ServiceBase(const TCHAR* serviceName)
+	ServiceBase::ServiceBase(const wchar_t* serviceName)
 	{
 		SERVICE_STATUS_HANDLE service = RegisterServiceCtrlHandlerEx(serviceName, HandlerCallback, this);
+		if(service == NULL)
+		{
+			throw std::runtime_error((boost::format("Register Service Handler is failed, error: %1%") 
+													% GetLastError()).str());
+		}
 		m_stateService.Initialize(service);
 	}
 
