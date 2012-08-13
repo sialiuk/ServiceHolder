@@ -2,14 +2,16 @@
 //
 
 #include "stdafx.h"
-#include "MyService.h"
-#include "MyService1.h"
 
+#include "MyServiceSecond.h"
+#include "..\ServiceHolder\ServiceGroupManager.h"
+
+using namespace service;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	sch::ServiceGroupManager serviceGroupe;
-	serviceGroupe.AddService(serviceName, sch::ServiceBase::ServiceFunction<Myservice>);
-	serviceGroupe.AddService(serviceName1, sch::ServiceBase::ServiceFunction<Myservice1>);
+	serviceGroupe.AddService(Name, sch::ServiceBase::ServiceFunction<MyserviceFirst>);
+	serviceGroupe.AddService(Name1, sch::ServiceBase::ServiceFunction<MyserviceSecond>);
 	
 	if( lstrcmpi( argv[1], TEXT("install")) == 0 )
     {
