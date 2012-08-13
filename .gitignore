@@ -1,0 +1,8 @@
+Debug/
+ServiceHolder/Debug/
+UseServiceHolder/Debug/
+ipch/
+/*.sdf
+/ServiceHolder/*.user
+*.user
+/*.suo
