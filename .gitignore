@@ -2,7 +2,6 @@ Debug/
 ServiceHolder/Debug/
 UseServiceHolder/Debug/
 ipch/
-/*.sdf
-/ServiceHolder/*.user
+*.sdf
 *.user
-/*.suo
+*.suo
