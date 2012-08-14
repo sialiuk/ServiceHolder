@@ -6,7 +6,7 @@ namespace sch
 	class ServiceBase
 	{
 	public:
-		explicit ServiceBase(const wchar_t* srviceName);
+		explicit ServiceBase(const wchar_t* serviceName, DWORD serviceType);
 		virtual ~ServiceBase();
 		virtual void OnStop();
 		virtual void OnStart();

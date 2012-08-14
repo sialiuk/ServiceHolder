@@ -10,10 +10,10 @@ namespace sch
 		ZeroMemory(this, sizeof(SERVICE_STATUS));
 	}
 
-	void ServiceState::Initialize(SERVICE_STATUS_HANDLE hService)
+	void ServiceState::Initialize(SERVICE_STATUS_HANDLE hService, DWORD serviceType)
 	{
 		m_service = hService;
-		dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+		dwServiceType = serviceType;
 		dwCurrentState = SERVICE_START_PENDING;
 		dwControlsAccepted = 0;
 		dwWin32ExitCode = NO_ERROR;

@@ -9,7 +9,7 @@ namespace sch
 	{
 	public:
 		ServiceState();
-		void Initialize(SERVICE_STATUS_HANDLE hService);
+		void Initialize(SERVICE_STATUS_HANDLE hService, DWORD serviceType);
 		void ReportStatus(DWORD stateUltimate, DWORD waitHint = 0);
 		DWORD GetCurrentState() const;
 	private:

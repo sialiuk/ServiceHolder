@@ -4,13 +4,13 @@
 namespace service
 {
 	MyserviceFirst::MyserviceFirst()
-		: sch::ServiceBase(L"UseServiceHolder")
+		: sch::ServiceBase(L"UseServiceHolder", SERVICE_WIN32_SHARE_PROCESS)
 		, m_flag(START)
 	{
 	}
 
 	MyserviceFirst::MyserviceFirst(TCHAR* name)
-		: sch::ServiceBase(name)
+		: sch::ServiceBase(name, SERVICE_WIN32_SHARE_PROCESS)
 		, m_flag(START)
 	{
 	}

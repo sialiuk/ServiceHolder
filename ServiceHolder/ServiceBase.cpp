@@ -4,7 +4,7 @@
 
 namespace sch
 {
-	ServiceBase::ServiceBase(const wchar_t* serviceName)
+	ServiceBase::ServiceBase(const wchar_t* serviceName, DWORD serviceType)
 	{
 		SERVICE_STATUS_HANDLE service = RegisterServiceCtrlHandlerEx(serviceName, HandlerCallback, this);
 		if(service == NULL)
@@ -12,7 +12,7 @@ namespace sch
 			throw std::runtime_error((boost::format("Register Service Handler is failed, error: %1%") 
 													% GetLastError()).str());
 		}
-		m_stateService.Initialize(service);
+		m_stateService.Initialize(service, serviceType);
 	}
 
 	ServiceBase::~ServiceBase()
