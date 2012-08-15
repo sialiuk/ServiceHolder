@@ -13,7 +13,6 @@ namespace sch
 		void StartServiceProcess();
 		void Remove();
 	private:
-		wchar_t* m_nameServiceGroup;
 		std::vector<SERVICE_TABLE_ENTRY> servicesTable;
 	};
 }

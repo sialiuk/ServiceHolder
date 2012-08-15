@@ -14,7 +14,7 @@ namespace service
 		ReportStatus(SERVICE_START_PENDING, 2000);
 
 		std::fstream file;
-		file.open("D:\\Test1.txt", std::fstream::out | std::fstream::app);
+		file.open("C:\\Test1.txt", std::fstream::out | std::fstream::app);
 
 		ReportStatus(SERVICE_RUNNING);
 
