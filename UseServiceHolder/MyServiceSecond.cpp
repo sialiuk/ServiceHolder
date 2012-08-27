@@ -4,6 +4,8 @@
 
 namespace service
 {
+	TCHAR Name1[] = L"UseServiceHolder1";
+
 	MyserviceSecond::MyserviceSecond()
 		: MyserviceFirst(Name1)
 	{

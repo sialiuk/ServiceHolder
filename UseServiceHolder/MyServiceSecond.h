@@ -4,7 +4,7 @@
 
 namespace service
 {
-	static TCHAR Name1[] = L"UseServiceHolder1";
+	extern TCHAR Name1[];
 
 	class MyserviceSecond
 		: public MyserviceFirst

@@ -9,7 +9,7 @@
 namespace service
 {
 	
-	static TCHAR Name[] = L"UseServiceHolder";
+	extern TCHAR Name[];
 
 	class MyserviceFirst
 		: public sch::ServiceBase

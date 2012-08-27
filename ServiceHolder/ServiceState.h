@@ -6,6 +6,7 @@ namespace sch
 {
 	class ServiceState
 		: public SERVICE_STATUS
+		, private boost::noncopyable
 	{
 	public:
 		ServiceState();
@@ -13,11 +14,7 @@ namespace sch
 		void ReportStatus(DWORD stateUltimate, DWORD waitHint = 0);
 		DWORD GetCurrentState() const;
 	private:
-		ServiceState(const ServiceState&);
-		ServiceState& operator=(const ServiceState&);
-	private:
 		SERVICE_STATUS_HANDLE m_service;
 		mutable boost::mutex m_mutex;
 	};
-
 }
